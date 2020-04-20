@@ -13,6 +13,8 @@ import (
 	"github.com/filecoin-project/specs-actors/actors/crypto"
 	"github.com/filecoin-project/specs-actors/actors/runtime/exitcode"
 	"github.com/ipfs/go-cid"
+	"github.com/ipfs/go-filestore"
+	peer "github.com/libp2p/go-libp2p-peer"
 )
 
 var ExampleValues = map[reflect.Type]interface{}{
@@ -51,6 +53,12 @@ func init() {
 
 	ExampleValues[reflect.TypeOf(addr)] = addr
 
+	pid, err := peer.IDB58Decode("12D3KooWGzxzKZYveHXtpG6AsrUJBcWxHBFS2HsEoGTxrMLvKXtf")
+	if err != nil {
+		panic(err)
+	}
+	addExample(pid)
+
 	addExample(abi.RegisteredProof_StackedDRG32GiBPoSt)
 	addExample(abi.ChainEpoch(10101))
 	addExample(crypto.SigTypeBLS)
@@ -58,6 +66,11 @@ func init() {
 	addExample(abi.MethodNum(1))
 	addExample(exitcode.ExitCode(0))
 	addExample(crypto.DomainSeparationTag_ElectionPoStChallengeSeed)
+	addExample(true)
+	addExample(abi.UnpaddedPieceSize(1024))
+	addExample(abi.UnpaddedPieceSize(1024).Padded())
+	addExample(abi.DealID(5432))
+	addExample(filestore.StatusFileChanged)
 }
 
 func exampleValue(t reflect.Type) interface{} {
@@ -76,12 +89,12 @@ func exampleValue(t reflect.Type) interface{} {
 	case reflect.Struct:
 		es := exampleStruct(t)
 		v := reflect.ValueOf(es).Elem().Interface()
-		ExampleValues[t] = v
+		//ExampleValues[t] = v
 		return v
 	case reflect.Ptr:
 		if t.Elem().Kind() == reflect.Struct {
 			es := exampleStruct(t.Elem())
-			ExampleValues[t] = es
+			//ExampleValues[t] = es
 			return es
 		}
 	case reflect.Interface:
@@ -104,6 +117,9 @@ func exampleStruct(t reflect.Type) interface{} {
 }
 
 func main() {
+	//b, _ := json.Marshal(exampleValue(reflect.TypeOf(&types.BlockHeader{})))
+	//fmt.Println(string(b))
+	//return
 
 	var api struct{ api.FullNode }
 	t := reflect.TypeOf(api)
@@ -133,6 +149,7 @@ func main() {
 			panic(err)
 		}
 
+		fmt.Println(ft.Out(0))
 		fmt.Printf("Response: `%s`\n", string(ov))
 		fmt.Println()
 	}

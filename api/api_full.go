@@ -33,8 +33,11 @@ type FullNode interface {
 	// ChainNotify returns channel with chain head updates
 	// First message is guaranteed to be of len == 1, and type == 'current'
 	ChainNotify(context.Context) (<-chan []*HeadChange, error)
+	// ChainHead returns the current head of the chain
 	ChainHead(context.Context) (*types.TipSet, error)
+	// ChainGetRandomness is used to sample the chain for randomness
 	ChainGetRandomness(ctx context.Context, tsk types.TipSetKey, personalization crypto.DomainSeparationTag, randEpoch abi.ChainEpoch, entropy []byte) (abi.Randomness, error)
+	// ChainGetBlock returns the block specified by the given CID
 	ChainGetBlock(context.Context, cid.Cid) (*types.BlockHeader, error)
 	ChainGetTipSet(context.Context, types.TipSetKey) (*types.TipSet, error)
 	ChainGetBlockMessages(context.Context, cid.Cid) (*BlockMessages, error)
@@ -52,8 +55,12 @@ type FullNode interface {
 	ChainGetPath(ctx context.Context, from types.TipSetKey, to types.TipSetKey) ([]*HeadChange, error)
 	ChainExport(context.Context, types.TipSetKey) (<-chan []byte, error)
 
-	// syncer
+	// Group: syncer
+
+	// SyncState returns the current status of the lotus sync system
 	SyncState(context.Context) (*SyncState, error)
+	// SyncSubmitBlock can be used to submit a newly created block to the
+	// network through this node
 	SyncSubmitBlock(ctx context.Context, blk *types.BlockMsg) error
 	SyncIncomingBlocks(ctx context.Context) (<-chan *types.BlockHeader, error)
 	SyncMarkBad(ctx context.Context, bcid cid.Cid) error

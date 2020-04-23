@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"reflect"
 	"strings"
 	"time"
@@ -161,10 +164,65 @@ func exampleStruct(t reflect.Type) interface{} {
 	return ns.Interface()
 }
 
+type Visitor struct {
+	Methods map[string]ast.Node
+}
+
+func (v *Visitor) Visit(node ast.Node) ast.Visitor {
+	st, ok := node.(*ast.TypeSpec)
+	if !ok {
+		return v
+	}
+
+	if st.Name.Name != "FullNode" {
+		return nil
+	}
+
+	iface := st.Type.(*ast.InterfaceType)
+	for _, m := range iface.Methods.List {
+		if len(m.Names) > 0 {
+			v.Methods[m.Names[0].Name] = m
+		}
+	}
+
+	return v
+}
+
+func parseApiASTInfo() map[string]string {
+
+	fset := token.NewFileSet()
+	pkgs, err := parser.ParseDir(fset, "./api", nil, parser.AllErrors|parser.ParseComments)
+	if err != nil {
+		fmt.Println("parse error: ", err)
+	}
+
+	ap := pkgs["api"]
+
+	f := ap.Files["api/api_full.go"]
+
+	cmap := ast.NewCommentMap(fset, f, f.Comments)
+
+	v := &Visitor{make(map[string]ast.Node)}
+	ast.Walk(v, pkgs["api"])
+
+	out := make(map[string]string)
+	for mn, node := range v.Methods {
+		cs := cmap.Filter(node).Comments()
+		if len(cs) == 0 {
+			out[mn] = "NO COMMENTS"
+		} else {
+			out[mn] = cs[len(cs)-1].Text()
+		}
+	}
+	return out
+}
+
 func main() {
 	//b, _ := json.Marshal(exampleValue(reflect.TypeOf(&types.BlockHeader{})))
 	//fmt.Println(string(b))
 	//return
+
+	comments := parseApiASTInfo()
 
 	var api struct{ api.FullNode }
 	t := reflect.TypeOf(api)
@@ -172,6 +230,9 @@ func main() {
 		m := t.Method(i)
 
 		fmt.Printf("## `%s`\n", m.Name)
+
+		fmt.Println(comments[m.Name])
+		fmt.Println()
 
 		var args []interface{}
 		ft := m.Func.Type()
@@ -185,7 +246,7 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("Inputs: `%s`\n", string(v))
+		fmt.Printf("Inputs: `%s`\n\n", string(v))
 
 		outv := exampleValue(ft.Out(0))
 
@@ -194,8 +255,7 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Println(ft.Out(0))
-		fmt.Printf("Response: `%s`\n", string(ov))
+		fmt.Printf("Response: `%s`\n\n", string(ov))
 		fmt.Println()
 	}
 }

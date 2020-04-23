@@ -5,16 +5,22 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/filecoin-project/go-address"
+	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/lotus/api"
+	"github.com/filecoin-project/lotus/build"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/node/modules/dtypes"
 	"github.com/filecoin-project/specs-actors/actors/abi"
 	"github.com/filecoin-project/specs-actors/actors/crypto"
 	"github.com/filecoin-project/specs-actors/actors/runtime/exitcode"
 	"github.com/ipfs/go-cid"
 	"github.com/ipfs/go-filestore"
+	"github.com/libp2p/go-libp2p-core/network"
 	peer "github.com/libp2p/go-libp2p-peer"
+	"github.com/multiformats/go-multiaddr"
 )
 
 var ExampleValues = map[reflect.Type]interface{}{
@@ -59,6 +65,7 @@ func init() {
 	}
 	addExample(pid)
 
+	addExample(bitfield.NewFromSet([]uint64{5}))
 	addExample(abi.RegisteredProof_StackedDRG32GiBPoSt)
 	addExample(abi.ChainEpoch(10101))
 	addExample(crypto.SigTypeBLS)
@@ -71,6 +78,37 @@ func init() {
 	addExample(abi.UnpaddedPieceSize(1024).Padded())
 	addExample(abi.DealID(5432))
 	addExample(filestore.StatusFileChanged)
+	addExample(abi.SectorNumber(9))
+	addExample(abi.SectorSize(32 * 1024 * 1024 * 1024))
+	addExample(api.MpoolChange(0))
+	addExample(network.Connected)
+	addExample(dtypes.NetworkName("lotus"))
+	addExample(api.SyncStateStage(1))
+	addExample(build.APIVersion)
+	addExample(api.PCHInbound)
+	addExample(time.Minute)
+	addExample(&types.ExecutionResult{
+		Msg:    exampleValue(reflect.TypeOf(&types.Message{})).(*types.Message),
+		MsgRct: exampleValue(reflect.TypeOf(&types.MessageReceipt{})).(*types.MessageReceipt),
+	})
+	addExample(map[string]types.Actor{
+		"t01236": exampleValue(reflect.TypeOf(types.Actor{})).(types.Actor),
+	})
+	addExample(map[string]api.MarketDeal{
+		"t026363": exampleValue(reflect.TypeOf(api.MarketDeal{})).(api.MarketDeal),
+	})
+	addExample(map[string]api.MarketBalance{
+		"t026363": exampleValue(reflect.TypeOf(api.MarketBalance{})).(api.MarketBalance),
+	})
+
+	maddr, err := multiaddr.NewMultiaddr("/ip4/52.36.61.156/tcp/1347/p2p/12D3KooWFETiESTf1v4PGUvtnxMAcEFMzLZbJGg4tjWfGEimYior")
+	if err != nil {
+		panic(err)
+	}
+
+	// because reflect.TypeOf(maddr) returns the concrete type...
+	ExampleValues[reflect.TypeOf(struct{ A multiaddr.Multiaddr }{}).Field(0).Type] = maddr
+
 }
 
 func exampleValue(t reflect.Type) interface{} {
@@ -89,8 +127,15 @@ func exampleValue(t reflect.Type) interface{} {
 	case reflect.Struct:
 		es := exampleStruct(t)
 		v := reflect.ValueOf(es).Elem().Interface()
-		//ExampleValues[t] = v
+		ExampleValues[t] = v
 		return v
+	case reflect.Array:
+		out := reflect.New(t).Elem()
+		for i := 0; i < t.Len(); i++ {
+			out.Index(i).Set(reflect.ValueOf(exampleValue(t.Elem())))
+		}
+		return out.Interface()
+
 	case reflect.Ptr:
 		if t.Elem().Kind() == reflect.Struct {
 			es := exampleStruct(t.Elem())

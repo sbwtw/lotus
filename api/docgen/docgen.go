@@ -7,8 +7,10 @@ import (
 	"go/parser"
 	"go/token"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
@@ -75,7 +77,7 @@ func init() {
 	addExample(int64(9))
 	addExample(abi.MethodNum(1))
 	addExample(exitcode.ExitCode(0))
-	addExample(crypto.DomainSeparationTag_ElectionPoStChallengeSeed)
+	addExample(crypto.DomainSeparationTag_ElectionProofProduction)
 	addExample(true)
 	addExample(abi.UnpaddedPieceSize(1024))
 	addExample(abi.UnpaddedPieceSize(1024).Padded())
@@ -188,7 +190,7 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	return v
 }
 
-func parseApiASTInfo() map[string]string {
+func parseApiASTInfo() (map[string]string, map[string]string) {
 
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, "./api", nil, parser.AllErrors|parser.ParseComments)
@@ -217,6 +219,29 @@ func parseApiASTInfo() map[string]string {
 	return out
 }
 
+type MethodGroup struct {
+	GroupName string
+	Header    string
+	Methods   []*Method
+}
+
+type Method struct {
+	Comment         string
+	Name            string
+	InputExample    string
+	ResponseExample string
+}
+
+func methodGroupFromName(mn string) string {
+	i := strings.IndexFunc(mn[1:], func(r rune) bool {
+		return unicode.IsUpper(r)
+	})
+	if i < 0 {
+		return ""
+	}
+	return mn[:i+1]
+}
+
 func main() {
 	//b, _ := json.Marshal(exampleValue(reflect.TypeOf(&types.BlockHeader{})))
 	//fmt.Println(string(b))
@@ -224,15 +249,22 @@ func main() {
 
 	comments := parseApiASTInfo()
 
+	groups := make(map[string]*MethodGroup)
+
 	var api struct{ api.FullNode }
 	t := reflect.TypeOf(api)
 	for i := 0; i < t.NumMethod(); i++ {
 		m := t.Method(i)
 
-		fmt.Printf("## `%s`\n", m.Name)
+		groupName := methodGroupFromName(m.Name)
 
-		fmt.Println(comments[m.Name])
-		fmt.Println()
+		g, ok := groups[groupName]
+		if !ok {
+			g = new(MethodGroup)
+			g.Header = groupName
+			g.GroupName = groupName
+			groups[groupName] = g
+		}
 
 		var args []interface{}
 		ft := m.Func.Type()
@@ -246,8 +278,6 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("Inputs: `%s`\n\n", string(v))
-
 		outv := exampleValue(ft.Out(0))
 
 		ov, err := json.Marshal(outv)
@@ -255,7 +285,37 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("Response: `%s`\n\n", string(ov))
-		fmt.Println()
+		g.Methods = append(g.Methods, &Method{
+			Name:            m.Name,
+			Comment:         comments[m.Name],
+			InputExample:    string(v),
+			ResponseExample: string(ov),
+		})
+	}
+
+	var groupslice []*MethodGroup
+	for _, g := range groups {
+		groupslice = append(groupslice, g)
+	}
+
+	sort.Slice(groupslice, func(i, j int) bool {
+		return groupslice[i].GroupName < groupslice[j].GroupName
+	})
+
+	for _, g := range groupslice {
+		fmt.Printf("## %s\n", g.GroupName)
+		fmt.Printf("%s\n\n", g.Header)
+
+		sort.Slice(g.Methods, func(i, j int) bool {
+			return g.Methods[i].Name < g.Methods[j].Name
+		})
+
+		for _, m := range g.Methods {
+			fmt.Printf("### %s\n", m.Name)
+			fmt.Printf("%s\n\n", m.Comment)
+
+			fmt.Printf("Inputs: `%s`\n\n", m.InputExample)
+			fmt.Printf("Response: `%s`\n\n", m.ResponseExample)
+		}
 	}
 }

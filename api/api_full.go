@@ -28,7 +28,9 @@ type FullNode interface {
 
 	// TODO: TipSetKeys
 
-	// chain
+	// MethodGroup: Chain
+	// The Chain method group contains methods for interacting with the
+	// blockchain, but that do not require any form of state computation
 
 	// ChainNotify returns channel with chain head updates
 	// First message is guaranteed to be of len == 1, and type == 'current'
@@ -55,7 +57,9 @@ type FullNode interface {
 	ChainGetPath(ctx context.Context, from types.TipSetKey, to types.TipSetKey) ([]*HeadChange, error)
 	ChainExport(context.Context, types.TipSetKey) (<-chan []byte, error)
 
-	// Group: syncer
+	// MethodGroup: Sync
+	// The Sync method group contains methods for interacting with and
+	// observing the lotus sync service
 
 	// SyncState returns the current status of the lotus sync system
 	SyncState(context.Context) (*SyncState, error)
@@ -66,7 +70,10 @@ type FullNode interface {
 	SyncMarkBad(ctx context.Context, bcid cid.Cid) error
 	SyncCheckBad(ctx context.Context, bcid cid.Cid) (string, error)
 
-	// messages
+	// MethodGroup: Mpool
+	// The Mpool methods are for interacting with the message pool. The message pool
+	// manages all incoming and outgoing 'messages' going over the network.
+
 	MpoolPending(context.Context, types.TipSetKey) ([]*types.SignedMessage, error)
 	MpoolPush(context.Context, *types.SignedMessage) (cid.Cid, error)
 	MpoolPushMessage(context.Context, *types.Message) (*types.SignedMessage, error) // get nonce, sign, push
@@ -74,16 +81,14 @@ type FullNode interface {
 	MpoolSub(context.Context) (<-chan MpoolUpdate, error)
 	MpoolEstimateGasPrice(context.Context, uint64, address.Address, int64, types.TipSetKey) (types.BigInt, error)
 
-	// FullNodeStruct
-
-	// miner
+	// MethodGroup: Miner
 
 	MinerGetBaseInfo(context.Context, address.Address, abi.ChainEpoch, types.TipSetKey) (*MiningBaseInfo, error)
 	MinerCreateBlock(context.Context, *BlockTemplate) (*types.BlockMsg, error)
 
 	// // UX ?
 
-	// wallet
+	// MethodGroup: Wallet
 
 	WalletNew(context.Context, crypto.SigType) (address.Address, error)
 	WalletHas(context.Context, address.Address) (bool, error)

@@ -95,7 +95,7 @@ require (
 	github.com/multiformats/go-multiaddr-net v0.1.5
 	github.com/multiformats/go-multihash v0.0.13
 	github.com/opentracing/opentracing-go v1.1.0
-	github.com/sbwtw/filecoin-ffi v0.26.4 // indirect
+	github.com/sbwtw/filecoin-ffi v0.26.4
 	github.com/stretchr/testify v1.5.1
 	github.com/whyrusleeping/bencher v0.0.0-20190829221104-bb6607aa8bba
 	github.com/whyrusleeping/cbor-gen v0.0.0-20200504204219-64967432584d
@@ -117,6 +117,7 @@ require (
 replace github.com/golangci/golangci-lint => github.com/golangci/golangci-lint v1.18.0
 
 replace github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi-origin
+
 replace github.com/sbwtw/filecoin-ffi => ./extern/filecoin-ffi
 
 replace github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 v22.0.0

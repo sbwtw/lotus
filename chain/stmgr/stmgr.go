@@ -23,7 +23,7 @@ import (
 	cbg "github.com/whyrusleeping/cbor-gen"
 	"golang.org/x/xerrors"
 
-	bls "github.com/filecoin-project/filecoin-ffi"
+	bls "github.com/sbwtw/filecoin-ffi"
 	"github.com/ipfs/go-cid"
 	hamt "github.com/ipfs/go-hamt-ipld"
 	blockstore "github.com/ipfs/go-ipfs-blockstore"

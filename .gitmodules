@@ -7,4 +7,4 @@
 	url = https://github.com/filecoin-project/serialization-vectors
 [submodule "extern/filecoin-ffi-origin"]
 	path = extern/filecoin-ffi-origin
-	url = git@github.com:sbwtw/filecoin-ffi.git
+	url = https://github.com/filecoin-project/filecoin-ffi

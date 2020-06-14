@@ -1,10 +1,11 @@
 [submodule "extern/filecoin-ffi"]
 	path = extern/filecoin-ffi
-	url = https://github.com/sbwtw/filecoin-ffi.git
-	branch = master
+	url = https://github.com/DeepBrainChain/DBC-filecoin-ffi
+	branch = webapi
 [submodule "extern/serialization-vectors"]
 	path = extern/serialization-vectors
 	url = https://github.com/filecoin-project/serialization-vectors
 [submodule "extern/filecoin-ffi-origin"]
 	path = extern/filecoin-ffi-origin
-	url = git@github.com:filecoin-project/filecoin-ffi.git
+	url = https://github.com/DeepBrainChain/DBC-filecoin-ffi
+	branch = webapi

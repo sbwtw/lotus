@@ -27,7 +27,7 @@ func TestDoesntDependOnFFI(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, pkg := range strings.Fields(string(deps)) {
-		if pkg == "github.com/sbwtw/filecoin-ffi" {
+		if pkg == "github.com/filecoin-project/filecoin-ffi" {
 			t.Fatal("api depends on filecoin-ffi")
 		}
 	}

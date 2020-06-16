@@ -5,7 +5,3 @@
 [submodule "extern/serialization-vectors"]
 	path = extern/serialization-vectors
 	url = https://github.com/filecoin-project/serialization-vectors
-[submodule "extern/filecoin-ffi-origin"]
-	path = extern/filecoin-ffi-origin
-	url = https://github.com/DeepBrainChain/DBC-filecoin-ffi
-	branch = webapi

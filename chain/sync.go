@@ -26,7 +26,7 @@ import (
 	"go.opencensus.io/trace"
 	"golang.org/x/xerrors"
 
-	bls "github.com/sbwtw/filecoin-ffi"
+	bls "github.com/filecoin-project/filecoin-ffi"
 	"github.com/filecoin-project/go-address"
 	amt "github.com/filecoin-project/go-amt-ipld/v2"
 	"github.com/filecoin-project/sector-storage/ffiwrapper"

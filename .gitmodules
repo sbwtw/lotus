@@ -4,7 +4,7 @@
 	branch = master
 [submodule "extern/filecoin-ffi-origin"]
 	path = extern/filecoin-ffi-origin
-	url = https://github.com/sbwtw/filecoin-ffi
+	url = https://github.com/filecoin-project/filecoin-ffi
 	branch = master
 [submodule "extern/serialization-vectors"]
 	path = extern/serialization-vectors

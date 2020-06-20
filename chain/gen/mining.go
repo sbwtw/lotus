@@ -3,7 +3,7 @@ package gen
 import (
 	"context"
 
-	bls "github.com/filecoin-project/filecoin-ffi"
+	bls "github.com/sbwtw/filecoin-ffi"
 	amt "github.com/filecoin-project/go-amt-ipld/v2"
 	"github.com/filecoin-project/specs-actors/actors/crypto"
 	cid "github.com/ipfs/go-cid"

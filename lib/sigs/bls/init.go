@@ -6,7 +6,7 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/specs-actors/actors/crypto"
 
-	ffi "github.com/filecoin-project/filecoin-ffi"
+	ffi "github.com/sbwtw/filecoin-ffi"
 
 	"github.com/filecoin-project/lotus/lib/sigs"
 )

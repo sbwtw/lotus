@@ -1,6 +1,7 @@
 [submodule "extern/filecoin-ffi"]
-	path = extern/filecoin-ffi
-	url = https://github.com/filecoin-project/filecoin-ffi.git
+    path = extern/filecoin-ffi
+    url = https://github.com/sbwtw/filecoin-ffi
+	branch = b6e0b35fb49ed0fe-webapi
 [submodule "extern/serialization-vectors"]
 	path = extern/serialization-vectors
 	url = https://github.com/filecoin-project/serialization-vectors.git
